@@ -565,6 +565,36 @@ WantedBy=default.target
         print("  systemctl --user daemon-reload && systemctl --user enable --now agquota")
         return 1
 
+def cmd_stop_service():
+    try:
+        subprocess.run(["systemctl", "--user", "stop", "agquota"], stderr=subprocess.DEVNULL)
+    except Exception: pass
+    try:
+        subprocess.run(["fuser", "-k", f"{env_int('AGQUOTA_PORT', 8765)}/tcp"], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+    except Exception: pass
+    print("✓ AgQuota background server stopped.")
+    print("  • To start again:  ./setup-service.sh (or: systemctl --user start agquota)")
+    print("  • To run manually: ./run.sh")
+    return 0
+
+def cmd_restart_service():
+    try:
+        subprocess.run(["systemctl", "--user", "restart", "agquota"], check=True)
+        print("✓ AgQuota background service restarted.")
+        print("  • Status: systemctl --user status agquota")
+        return 0
+    except Exception as e:
+        print(f"Failed to restart service via systemctl: {e}")
+        return 1
+
+def cmd_status_service():
+    try:
+        subprocess.run(["systemctl", "--user", "status", "agquota", "--no-pager"])
+        return 0
+    except Exception as e:
+        print(f"Failed to query systemctl: {e}")
+        return 1
+
 def cmd_uninstall_service():
     svc_path = os.path.expanduser("~/.config/systemd/user/agquota.service")
     try:
@@ -599,11 +629,17 @@ def main():
     sp.add_parser("selftest", help="Run internal tests")
     sp.add_parser("install", help="Install & start systemd background user service")
     sp.add_parser("setup", help="Alias for install")
+    sp.add_parser("stop", help="Stop the background server")
+    sp.add_parser("restart", help="Restart the background server")
+    sp.add_parser("status", help="Check background server status")
     sp.add_parser("uninstall", help="Stop and remove systemd background user service")
     a = ap.parse_args()
     if not a.cmd: a.cmd = "serve"
     logging.basicConfig(level=logging.DEBUG if a.verbose else logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     if a.cmd in ("install", "setup"): return cmd_install_service()
+    if a.cmd == "stop": return cmd_stop_service()
+    if a.cmd == "restart": return cmd_restart_service()
+    if a.cmd == "status": return cmd_status_service()
     if a.cmd == "uninstall": return cmd_uninstall_service()
     if a.cmd == "doctor": return cmd_doctor()
     if a.cmd == "selftest": return selftest()

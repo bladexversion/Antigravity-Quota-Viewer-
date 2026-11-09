@@ -78,17 +78,20 @@ This automatically detects your local environment, installs the `systemd` user s
 #### Managing the Background Service
 
 ```bash
+# Stop background server
+./stop.sh
+# (or: python3 agquota.py stop)
+
 # Check service status
-systemctl --user status agquota
+python3 agquota.py status
+# (or: systemctl --user status agquota)
+
+# Restart service
+python3 agquota.py restart
+# (or: systemctl --user restart agquota)
 
 # Stream real-time logs
 journalctl --user -u agquota -f
-
-# Restart service
-systemctl --user restart agquota
-
-# Stop service
-systemctl --user stop agquota
 
 # Uninstall service
 python3 agquota.py uninstall
@@ -124,8 +127,9 @@ python3 agquota.py forget user@gmail.com
 ```
 QUOTA/
 ├── agquota.py              # Server, daemon discovery, store & CLI subcommands
-├── run.sh                  # Quick script to run server manually in foreground
-├── setup-service.sh        # 1-click script to install & start systemd background service
+├── run.sh                  # Start server manually in foreground
+├── setup-service.sh        # Install & start systemd background service
+├── stop.sh                 # Stop background server
 ├── index.html              # Main dashboard entrypoint
 ├── static/
 │   ├── css/
