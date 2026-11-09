@@ -49,50 +49,33 @@ AgQuota runs entirely locally on loopback (`127.0.0.1`), requires **zero externa
 * Python 3.8+ (no `pip install` required)
 * Antigravity installed and running
 
-### Running Manually
+## 🚀 Quick Start
+
+### Option 1: Run Manually (Foreground)
+
+To run the server manually in your terminal:
 
 ```bash
-# Start the local server (default port 8765)
-python3 agquota.py serve
-
-# Open the dashboard in your browser
-xdg-open http://127.0.0.1:8765/
+./run.sh
 ```
+*(Or `python3 agquota.py`)*
+
+Then open **http://127.0.0.1:8765/** in your browser.
 
 ---
 
-## ⚙️ Running as a Background Service (`systemd`)
+### Option 2: Run in the Background (`systemd` Service) — Recommended
 
-To have AgQuota automatically start on login and silently capture quotas in the background whenever you switch accounts:
-
-### 1. Install user service
-
-Create `~/.config/systemd/user/agquota.service`:
-
-```ini
-[Unit]
-Description=AgQuota Local Antigravity Monitor
-After=network.target
-
-[Service]
-Type=simple
-ExecStart=/usr/bin/python3 /home/aravsun/Desktop/QUOTA/agquota.py serve
-WorkingDirectory=/home/aravsun/Desktop/QUOTA
-Restart=always
-RestartSec=5
-
-[Install]
-WantedBy=default.target
-```
-
-### 2. Enable and start
+To set up AgQuota to run silently in the background and automatically start on system login:
 
 ```bash
-systemctl --user daemon-reload
-systemctl --user enable --now agquota
+./setup-service.sh
 ```
+*(Or `python3 agquota.py install`)*
 
-### 3. Service Management Commands
+This automatically detects your local environment, installs the `systemd` user service, and starts it immediately.
+
+#### Managing the Background Service
 
 ```bash
 # Check service status
@@ -106,6 +89,9 @@ systemctl --user restart agquota
 
 # Stop service
 systemctl --user stop agquota
+
+# Uninstall service
+python3 agquota.py uninstall
 ```
 
 ---
@@ -137,7 +123,9 @@ python3 agquota.py forget user@gmail.com
 
 ```
 QUOTA/
-├── agquota.py              # Server, daemon discovery, store & API endpoints
+├── agquota.py              # Server, daemon discovery, store & CLI subcommands
+├── run.sh                  # Quick script to run server manually in foreground
+├── setup-service.sh        # 1-click script to install & start systemd background service
 ├── index.html              # Main dashboard entrypoint
 ├── static/
 │   ├── css/

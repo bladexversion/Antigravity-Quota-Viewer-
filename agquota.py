@@ -527,18 +527,87 @@ def selftest():
     r = unittest.TextTestRunner(verbosity=1).run(unittest.defaultTestLoader.loadTestsFromTestCase(T))
     return 0 if r.wasSuccessful() else 1
 
+def cmd_install_service():
+    user_systemd = os.path.expanduser("~/.config/systemd/user")
+    os.makedirs(user_systemd, exist_ok=True)
+    svc_path = os.path.join(user_systemd, "agquota.service")
+    py = sys.executable or "/usr/bin/python3"
+    script = os.path.abspath(__file__)
+    content = f"""[Unit]
+Description=AgQuota Local Antigravity Monitor
+After=network.target
+
+[Service]
+Type=simple
+ExecStart={py} {script} serve
+WorkingDirectory={HERE}
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+"""
+    with open(svc_path, "w", encoding="utf-8") as f:
+        f.write(content)
+    try:
+        subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)
+        subprocess.run(["systemctl", "--user", "enable", "--now", "agquota"], check=True)
+        print("✓ AgQuota background service successfully installed and started!")
+        print("  • Dashboard: http://127.0.0.1:8765/")
+        print("  • Status:    systemctl --user status agquota")
+        print("  • Logs:      journalctl --user -u agquota -f")
+        print("  • Stop:      systemctl --user stop agquota")
+        print("  • Uninstall: python3 agquota.py uninstall")
+        return 0
+    except Exception as e:
+        print(f"Service file written to {svc_path}, but systemctl failed: {e}")
+        print("You can activate it manually with:")
+        print("  systemctl --user daemon-reload && systemctl --user enable --now agquota")
+        return 1
+
+def cmd_uninstall_service():
+    svc_path = os.path.expanduser("~/.config/systemd/user/agquota.service")
+    try:
+        subprocess.run(["systemctl", "--user", "stop", "agquota"], stderr=subprocess.DEVNULL)
+        subprocess.run(["systemctl", "--user", "disable", "agquota"], stderr=subprocess.DEVNULL)
+        if os.path.exists(svc_path): os.unlink(svc_path)
+        subprocess.run(["systemctl", "--user", "daemon-reload"], stderr=subprocess.DEVNULL)
+        print("✓ AgQuota background service stopped and removed.")
+        return 0
+    except Exception as e:
+        print(f"Error uninstalling service: {e}")
+        return 1
+
 def main():
-    ap = argparse.ArgumentParser(prog="agquota"); ap.add_argument("-v", "--verbose", action="store_true")
-    sp = ap.add_subparsers(dest="cmd", required=True)
-    s = sp.add_parser("serve"); s.add_argument("--host", default="127.0.0.1"); s.add_argument("--port", type=int, default=env_int("AGQUOTA_PORT", 8765))
-    s.add_argument("--poll", type=int, default=env_int("AGQUOTA_POLL_SECONDS", 30)); s.add_argument("--i-know-this-is-exposed", action="store_true")
-    o = sp.add_parser("once"); o.add_argument("--show", choices=["remaining", "used"], default="remaining"); o.add_argument("--json", action="store_true")
-    sp.add_parser("list"); f = sp.add_parser("forget"); f.add_argument("email"); sp.add_parser("doctor"); sp.add_parser("selftest")
+    if len(sys.argv) == 1:
+        sys.argv.append("serve")
+    ap = argparse.ArgumentParser(prog="agquota", description="AgQuota — Antigravity AI Quota Monitor")
+    ap.add_argument("-v", "--verbose", action="store_true")
+    sp = ap.add_subparsers(dest="cmd")
+    s = sp.add_parser("serve", help="Run local web server dashboard")
+    s.add_argument("--host", default="127.0.0.1")
+    s.add_argument("--port", type=int, default=env_int("AGQUOTA_PORT", 8765))
+    s.add_argument("--poll", type=int, default=env_int("AGQUOTA_POLL_SECONDS", 30))
+    s.add_argument("--i-know-this-is-exposed", action="store_true")
+    o = sp.add_parser("once", help="Print quota snapshot once")
+    o.add_argument("--show", choices=["remaining", "used"], default="remaining")
+    o.add_argument("--json", action="store_true")
+    sp.add_parser("list", help="List accounts in terminal")
+    f = sp.add_parser("forget", help="Remove an account from monitoring")
+    f.add_argument("email")
+    sp.add_parser("doctor", help="Run diagnostics")
+    sp.add_parser("selftest", help="Run internal tests")
+    sp.add_parser("install", help="Install & start systemd background user service")
+    sp.add_parser("setup", help="Alias for install")
+    sp.add_parser("uninstall", help="Stop and remove systemd background user service")
     a = ap.parse_args()
+    if not a.cmd: a.cmd = "serve"
     logging.basicConfig(level=logging.DEBUG if a.verbose else logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    if a.cmd == "serve" and a.poll < 5: sys.exit("error: --poll must be at least 5 seconds")
+    if a.cmd in ("install", "setup"): return cmd_install_service()
+    if a.cmd == "uninstall": return cmd_uninstall_service()
     if a.cmd == "doctor": return cmd_doctor()
     if a.cmd == "selftest": return selftest()
+    if a.cmd == "serve" and getattr(a, "poll", 30) < 5: sys.exit("error: --poll must be at least 5 seconds")
     store = Store(state_path())
     if a.cmd == "serve": return cmd_serve(a, store)
     if a.cmd == "once": return cmd_once(a, store)
