@@ -51,51 +51,47 @@ AgQuota runs entirely locally on loopback (`127.0.0.1`), requires **zero externa
 
 ## 🚀 Quick Start
 
-### Option 1: Run Manually (Foreground)
+### 1. Run in the Background (Recommended)
 
-To run the server manually in your terminal:
-
-```bash
-./run.sh
-```
-*(Or `python3 agquota.py`)*
-
-Then open **http://127.0.0.1:8765/** in your browser.
-
----
-
-### Option 2: Run in the Background (`systemd` Service) — Recommended
-
-To set up AgQuota to run silently in the background and automatically start on system login:
+Set up AgQuota to run silently in the background and start automatically on login/boot:
 
 ```bash
-./setup-service.sh
+python3 agquota.py setup
 ```
-*(Or `python3 agquota.py install`)*
 
-This automatically detects your local environment, installs the `systemd` user service, and starts it immediately.
+That's it! It automatically detects your local environment, installs the `systemd` user service, and starts it immediately.
+
+View your dashboard anytime at **http://127.0.0.1:8765/**.
 
 #### Managing the Background Service
 
 ```bash
-# Stop background server
-./stop.sh
-# (or: python3 agquota.py stop)
-
 # Check service status
 python3 agquota.py status
-# (or: systemctl --user status agquota)
 
-# Restart service
+# Stop background server
+python3 agquota.py stop
+
+# Restart background server
 python3 agquota.py restart
-# (or: systemctl --user restart agquota)
 
-# Stream real-time logs
+# Stream live background logs
 journalctl --user -u agquota -f
 
-# Uninstall service
+# Uninstall & remove background service
 python3 agquota.py uninstall
 ```
+
+---
+
+### 2. Or Run Manually in Foreground
+
+If you prefer to run it manually only when you want to view the dashboard:
+
+```bash
+python3 agquota.py
+```
+*(Press `Ctrl+C` to stop).*
 
 ---
 
@@ -126,10 +122,7 @@ python3 agquota.py forget user@gmail.com
 
 ```
 QUOTA/
-├── agquota.py              # Server, daemon discovery, store & CLI subcommands
-├── run.sh                  # Start server manually in foreground
-├── setup-service.sh        # Install & start systemd background service
-├── stop.sh                 # Stop background server
+├── agquota.py              # Server daemon, discovery, state & CLI management
 ├── index.html              # Main dashboard entrypoint
 ├── static/
 │   ├── css/
