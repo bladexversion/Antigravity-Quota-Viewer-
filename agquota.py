@@ -388,7 +388,7 @@ def make_handler(store, port, extra_hosts=(), collector=None):
                     v = store.view(); v.pop("_alive")
                     return s._send(200, v)
                 v = store.view(); alive = v.pop("_alive")
-                if path in ("/", "/dashboard", "/dashboard3", "/view"): return s._send(200, load_dashboard3(), "text/html", csp=True)
+                if path in ("/", "/index.html", "/dashboard", "/dashboard3", "/view"): return s._send(200, load_dashboard(), "text/html", csp=True)
                 if path == "/health": return s._send(200, {"ok": True, "collector_alive": alive})
                 if path == "/api/usage":
                     if q.get("format") == ["text"]: return s._send(200, text_report(v, (q.get("show") or ["remaining"])[0]), "text/plain")
@@ -426,11 +426,12 @@ def load_quota_view():
     except OSError:
         return "<h1>quota-view.html not found</h1><p>Put quota-view.html in the same folder as agquota.py.</p>"
 
-def load_dashboard3():
-    try:
-        with open(os.path.join(HERE, "dashboard3.html"), encoding="utf-8") as fh: return fh.read()
-    except OSError:
-        return "<h1>dashboard3.html not found</h1><p>Put dashboard3.html in the same folder as agquota.py.</p>"
+def load_dashboard():
+    for name in ("index.html", "dashboard.html", "dashboard3.html"):
+        p = os.path.join(HERE, name)
+        if os.path.exists(p):
+            with open(p, encoding="utf-8") as fh: return fh.read()
+    return "<h1>index.html not found</h1><p>Put index.html in the same folder as agquota.py.</p>"
 
 def find_font():
     """Optional local Geist Mono: drop any *GeistMono*.woff2 next to this file. Nothing is fetched online."""
@@ -487,7 +488,8 @@ def cmd_doctor():
                     log.debug("%s://127.0.0.1:%s: %s", sch, port, e)
             if not answered:
                 print(f"[FAIL] port {port}: neither http nor https answered")
-    print(f"[{ok(os.path.exists(os.path.join(HERE, 'dashboard3.html')))}] dashboard3.html next to agquota.py")
+    html_found = any(os.path.exists(os.path.join(HERE, f)) for f in ("index.html", "dashboard3.html"))
+    print(f"[{ok(html_found)}] index.html next to agquota.py")
     print(f"[{'PASS' if find_font() else 'INFO'}] local Geist Mono woff2 font: {find_font() or 'not found, using system monospace'}")
     print(f"state file: {state_path()}")
 
