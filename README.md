@@ -69,7 +69,7 @@ View your dashboard anytime at **http://127.0.0.1:8765/**.
 # Check service status
 python3 agquota.py status
 
-# Stop background server
+# Stop background server (temporary - restarts on next reboot)
 python3 agquota.py stop
 
 # Restart background server
@@ -78,9 +78,22 @@ python3 agquota.py restart
 # Stream live background logs
 journalctl --user -u agquota -f
 
-# Uninstall & remove background service
+# Uninstall background service (completely removes autostart)
 python3 agquota.py uninstall
 ```
+
+##### `stop` vs `uninstall`
+
+> 💡 **Which one should I use?**
+> * Use **`stop`** if you want to stop it **temporarily** (frees port 8765 now, but starts again when you reboot/log in).
+> * Use **`uninstall`** if you want to stop and remove the background service **completely** (will not restart on reboot).
+
+| Command | Action | Restarts on next reboot? |
+| :--- | :--- | :--- |
+| **`python3 agquota.py stop`** | **Temporarily pauses** the background server and frees port 8765 right now. | **Yes** (autostart remains enabled for next login/reboot). |
+| **`python3 agquota.py uninstall`** | **Permanently removes** the background service and deletes the systemd unit file. | **No** (autostart is completely unregistered). |
+
+> **Note:** Neither command deletes your code or your saved account history (`~/.local/state/agquota/state.json`).
 
 ---
 
