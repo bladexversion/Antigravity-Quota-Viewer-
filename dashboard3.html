@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AgQuota — AI Quota Monitor</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect width='20' height='20' rx='5' fill='%2309090F'/%3E%3Crect x='4' y='4' width='12' height='4' rx='1.5' fill='%238B5CF6'/%3E%3Crect x='4' y='10' width='8' height='4' rx='1.5' fill='%2334D399'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+
+  <!-- Top Sticky Header -->
+  <header id="header">
+    <div class="h-brand">
+      <svg class="h-logo" viewBox="0 0 26 26" fill="none">
+        <rect width="26" height="26" rx="6" fill="#12121B"/>
+        <rect x="5" y="5" width="16" height="5" rx="2" fill="#8B5CF6"/>
+        <rect x="5" y="13" width="10" height="5" rx="2" fill="#34D399"/>
+        <rect x="17" y="13" width="4" height="5" rx="2" fill="#FBBF24"/>
+      </svg>
+      <span class="h-title">Ag<em>Quota</em></span>
+      <span class="h-desc">Your Antigravity accounts at a glance.</span>
+    </div>
+
+    <div class="h-spacer"></div>
+
+    <div class="h-right">
+      <span class="h-ts" id="h-ts"></span>
+      <span class="h-status" id="h-status">
+        <span class="h-sdot"></span>
+        <span id="h-status-text">Connecting</span>
+      </span>
+
+      <label class="toggle-wrap" title="Mask email addresses">
+        <input type="checkbox" id="mask">
+        <span class="toggle-knob"></span>
+        <span>Hide</span>
+      </label>
+
+      <button id="ref-btn" class="h-refresh" type="button" title="Refresh all quotas">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2v3h-3"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main id="main">
+
+    <!-- Offline notification banner -->
+    <div id="offline-banner">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="8" cy="8" r="6"/>
+        <path d="M8 5v3.5M8 11v.5"/>
+      </svg>
+      <span id="offline-text">Service offline</span>
+    </div>
+
+    <!-- Active Account Banner -->
+    <section id="active-card" style="display:none">
+      <div class="ac-identity">
+        <div class="ac-avatar" id="ac-avatar">?</div>
+        <div class="ac-info">
+          <div class="ac-live-row">
+            <span class="ac-live-dot"></span>
+            <span class="ac-live-label">Active</span>
+          </div>
+          <span class="ac-email" id="ac-email"></span>
+          <span class="ac-plan" id="ac-plan"></span>
+        </div>
+      </div>
+
+      <div class="ac-pools" id="ac-pools"></div>
+
+      <div class="ac-right">
+        <span class="ac-reset-badge" id="ac-reset-badge" style="display:none"></span>
+        <button class="ac-copy" id="ac-copy" type="button">Copy email</button>
+      </div>
+    </section>
+
+    <!-- Controls Toolbar -->
+    <section id="table-toolbar">
+      <div class="toolbar-left">
+        <div class="sort-pills">
+          <button class="sort-pill active" data-sort="best">Best Overall</button>
+          <button class="sort-pill" data-sort="gemini">Highest Gemini</button>
+          <button class="sort-pill" data-sort="claude">Highest Claude &amp; GPT</button>
+          <button class="sort-pill" data-sort="lowest">Lowest Quota</button>
+          <button class="sort-pill" data-sort="recent">Recently Active</button>
+        </div>
+      </div>
+
+      <div class="toolbar-right">
+        <div class="density-btns" title="Adjust row spacing">
+          <button class="density-btn" data-density="compact" title="Compact">▪▪▪</button>
+          <button class="density-btn active" data-density="normal" title="Normal">▪ ▪</button>
+          <button class="density-btn" data-density="spacious" title="Spacious">▪&nbsp;&nbsp;▪</button>
+        </div>
+        <span class="tb-acct-count" id="acct-count"></span>
+        <span class="refresh-cd" id="refresh-cd"></span>
+      </div>
+    </section>
+
+    <!-- Account Comparison Grid / Table -->
+    <section id="tbl-wrap" class="d-normal">
+      <div class="grid-table">
+        <div class="grid-row grid-header">
+          <div class="grid-th">Account</div>
+          <div class="grid-th">Gemini</div>
+          <div class="grid-th">Claude &amp; GPT</div>
+          <div class="grid-th">Health</div>
+          <div class="grid-th th-right">Reset</div>
+          <div class="grid-th"></div>
+        </div>
+        <div id="grid-body"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Forget Account Confirmation Modal -->
+  <div id="dialog-overlay" hidden>
+    <div class="dialog">
+      <div class="dialog-title">Forget account?</div>
+      <div class="dialog-body" id="dialog-body"></div>
+      <div class="dialog-actions">
+        <button class="btn-cancel" id="dialog-cancel" type="button">Cancel</button>
+        <button class="btn-danger" id="dialog-confirm" type="button">Forget</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Modular Application Script -->
+  <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>
