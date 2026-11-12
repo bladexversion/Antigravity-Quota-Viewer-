@@ -289,7 +289,7 @@ function tick() {
 function applyDensity(density) {
   preferences.density = density;
   const wrap = $("#tbl-wrap");
-  wrap.classList.remove("d-compact", "d-normal", "d-spacious");
+  wrap.classList.remove("d-compact", "d-normal", "d-spacious", "d-ultra");
   wrap.classList.add(`d-${density}`);
 
   document.querySelectorAll(".density-btn").forEach(btn => {

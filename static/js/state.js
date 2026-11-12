@@ -15,7 +15,10 @@ export const preferences = {
     try { localStorage.setItem("agq_sort", val); } catch {}
   },
   get density() {
-    try { return localStorage.getItem("agq_density") || "normal"; } catch { return "normal"; }
+    try {
+      const d = localStorage.getItem("agq_density");
+      return (d === "ultra" || d === "compact") ? d : "compact";
+    } catch { return "compact"; }
   },
   set density(val) {
     try { localStorage.setItem("agq_density", val); } catch {}
