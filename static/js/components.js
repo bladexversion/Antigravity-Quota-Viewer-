@@ -399,6 +399,7 @@ export function showContextMenu(event, account, onForget) {
     document.addEventListener("keydown", e => {
       if (e.key === "Escape") closeContextMenu();
     }, { once: true });
+    window.addEventListener("scroll", closeContextMenu, { capture: true, once: true, passive: true });
   }, 0);
 }
 
