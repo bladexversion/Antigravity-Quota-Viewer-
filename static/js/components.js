@@ -342,7 +342,13 @@ export function showContextMenu(event, account, onForget) {
 
   // Item 1: Copy Email
   const copyItem = el("div", "ctx-item");
-  copyItem.innerHTML = `<span style="font-size:13px;width:18px;text-align:center;">📋</span> Copy email`;
+  copyItem.innerHTML = `
+    <svg class="ctx-icon ctx-icon-copy" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="5" y="5" width="9" height="9" rx="1.8"></rect>
+      <path d="M5 2H3a1 1 0 0 0-1 1v8"></path>
+    </svg>
+    <span>Copy email</span>
+  `;
   copyItem.onclick = async () => {
     closeContextMenu();
     try {
@@ -358,7 +364,12 @@ export function showContextMenu(event, account, onForget) {
 
   // Item 2: Forget Account
   const forgetItem = el("div", "ctx-item danger");
-  forgetItem.innerHTML = `<span style="font-size:13px;width:18px;text-align:center;">🗑</span> Forget account`;
+  forgetItem.innerHTML = `
+    <svg class="ctx-icon ctx-icon-trash" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 4h10M6 4V2.5A1.5 1.5 0 0 1 7.5 1h1A1.5 1.5 0 0 1 10 2.5V4M12 4v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4"></path>
+    </svg>
+    <span>Forget account</span>
+  `;
   forgetItem.onclick = () => {
     closeContextMenu();
     onForget(account);
@@ -374,7 +385,7 @@ export function showContextMenu(event, account, onForget) {
 
   let top = rect.bottom + 4;
   let left = rect.left;
-  if (left + 160 > window.innerWidth - 12) left = window.innerWidth - 172;
+  if (left + 170 > window.innerWidth - 12) left = window.innerWidth - 182;
   if (top + 100 > window.innerHeight - 12) top = rect.top - 104;
 
   menu.style.top = `${top}px`;
