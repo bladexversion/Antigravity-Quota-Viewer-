@@ -17,7 +17,7 @@ export const preferences = {
   get density() {
     try {
       const d = localStorage.getItem("agq_density");
-      return (d === "ultra" || d === "compact") ? d : "compact";
+      return (d === "single" || d === "ultra" || d === "compact") ? d : "compact";
     } catch { return "compact"; }
   },
   set density(val) {

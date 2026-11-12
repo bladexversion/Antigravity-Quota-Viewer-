@@ -838,6 +838,138 @@ button {
   font-size: 10px;
 }
 
+/* ── Single-Row Minimal Density (.d-single) ── */
+.d-single .grid-header {
+  height: 38px;
+}
+
+.d-single .grid-row {
+  min-height: 28px;
+}
+
+.d-single .grid-cell {
+  padding: 2px 14px;
+}
+
+/* 1. Account column: 1 clean row with avatar and email only */
+.d-single .cell-acct {
+  gap: 8px;
+}
+
+.d-single .acct-avatar {
+  width: 18px;
+  height: 18px;
+  font-size: 9px;
+  font-weight: 700;
+  border-width: 1px;
+}
+
+.d-single .acct-email {
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+/* Hide all secondary meta (Active text, time ago, plan badge) to keep strict 1 row */
+.d-single .acct-meta {
+  display: none !important;
+}
+
+.d-single .acct-copy-btn {
+  padding: 1px 5px;
+  font-size: 9px;
+  height: 16px;
+  line-height: 1;
+}
+
+/* Active row highlight in single-row mode (clearly highlighted without taking vertical space) */
+.d-single .grid-row.row-live {
+  background: rgba(99, 102, 241, 0.08);
+  box-shadow: inset 3px 0 0 var(--accent-sec);
+}
+
+.d-single .grid-row.row-live:hover {
+  background: rgba(99, 102, 241, 0.14);
+}
+
+.d-single .row-live .acct-email {
+  color: #fff;
+  font-weight: 600;
+}
+
+.d-single .row-live .acct-avatar {
+  box-shadow: 0 0 0 1.5px var(--accent-sec);
+}
+
+/* 2. Quota pools (Gemini & Claude/GPT): Percentage & bar side-by-side in 1 row */
+.d-single .cell-pool {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.d-single .pool-top {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 38px;
+}
+
+.d-single .pool-pct {
+  font-size: 11.5px;
+  line-height: 1;
+}
+
+/* Hide pool state label text ("Available", "Exhausted") to stay on single line */
+.d-single .pool-state-label {
+  display: none !important;
+}
+
+.d-single .pool-track {
+  flex: 1;
+  height: 4px;
+  min-width: 45px;
+}
+
+/* 3. Health badge: compact single line */
+.d-single .health-badge {
+  font-size: 9.5px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  line-height: 1.2;
+}
+
+/* 4. Reset column: single text line, hide cycle bar */
+.d-single .cell-reset {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.d-single .reset-txt {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.d-single .reset-cycle-bar {
+  display: none !important;
+}
+
+/* 5. Menu cell */
+.d-single .cell-menu {
+  height: 28px;
+}
+
+.d-single .menu-btn {
+  width: 20px;
+  height: 20px;
+}
+
+.d-single .menu-btn svg {
+  width: 11px;
+  height: 11px;
+}
+
 .grid-row:hover {
   background: var(--surf-sec);
 }
